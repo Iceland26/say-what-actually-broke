@@ -14,13 +14,20 @@ LINE = (
 
 
 def main() -> None:
+    # The gate allows at most 200 characters; fail loudly in
+    # development rather than ever shipping an over-long line.
+    assert 0 < len(LINE) <= 200, "entry line must be 1-200 characters"
     print(LINE)
     # The program/v1 harness reads the entry from /output/entry.txt
     # when that directory exists; locally there is no /output, so the
-    # printed line above is the whole behaviour.
+    # printed line above is the whole behaviour. A read-only /output
+    # must never crash the program: the printed line still counts.
     if os.path.isdir("/output"):
-        with open("/output/entry.txt", "w", encoding="utf-8") as fh:
-            fh.write(LINE)
+        try:
+            with open("/output/entry.txt", "w", encoding="utf-8") as fh:
+                fh.write(LINE)
+        except OSError:
+            pass
 
 
 if __name__ == "__main__":
